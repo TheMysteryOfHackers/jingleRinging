@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingle.oa.system.mapper.UserMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap"
+		type="com.jingle.oa.system.entity.User">
+		<id column="id" property="id" />
+		<result column="crtm" property="crtm" />
+		<result column="crer" property="crer" />
+		<result column="mdtm" property="mdtm" />
+		<result column="mder" property="mder" />
+		<result column="name" property="name" />
+		<result column="pwd" property="pwd" />
+		<result column="rname" property="rname" />
+		<result column="address" property="address" />
+		<result column="mobile" property="mobile" />
+		<result column="sex" property="sex" />
+		<result column="email" property="email" />
+		<result column="birth" property="birth" />
+		<result column="remarks" property="remarks" />
+	</resultMap>
+
+	<!-- 通用查询结果列 -->
+	<sql id="Base_Column_List">
+		crtm,
+		crer,
+		mdtm,
+		mder,
+		id, name, pwd, rname, address, mobile,
+		sex, email, birth, remarks,
+	</sql>
+
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingle.oa.device.mapper.DeviceMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jingle.oa.device.entity.Device">
+		<id column="id" property="id" />
+		<result column="crtm" property="crtm" />
+		<result column="mdtm" property="mdtm" />
+		<result column="dtid" property="dtid" />
+		<result column="code" property="code" />
+		<result column="residual" property="residual" />
+		<result column="price" property="price" />
+		<result column="status" property="status" />
+		<result column="proddate" property="proddate" />
+		<result column="creator" property="creator" />
+		<result column="createtime" property="createtime" />
+		<result column="buyer" property="buyer" />
+		<result column="buydate" property="buydate" />
+		<result column="sno" property="sno" />
+		<result column="crer" property="crer" />
+		<result column="mder" property="mder" />
+	</resultMap>
+
+	<!-- 通用查询结果列 -->
+	<sql id="Base_Column_List">
+		crtm,
+		mdtm,
+		id, dtid, code, residual, price, status, proddate, creator, createtime, buyer, buydate, sno, crer, mder
+	</sql>
+
+	<select id="selectPageVo" resultType="com.jingle.oa.device.vo.DeviceVo">
+		select
+		d.*,
+		dt.name as dtname,
+		dt.brand as dtbrand,
+		dt.model as dtmodel,
+		u.rname as ucreator,
+		u1.rname as ubuyer
+		from
+		device d
+		left join devicetype dt on d.dtid = dt.id
+		left join user u on d.creator=u.id
+		left join user u1 on d.buyer=u1.id
+		${ew.customSqlSegment}
+	</select>
+
+	<select id="selectVo" resultType="com.jingle.oa.device.vo.DeviceVo">
+		select
+		d.*,
+		dt.name as dtname,
+		dt.brand as dtbrand,
+		dt.model as dtmodel,
+		u.rname as ucreator,
+		u1.rname as ubuyer
+		from
+		device d
+		left join devicetype dt on d.dtid = dt.id
+		left join user u on d.creator=u.id
+		left join user u1 on d.buyer=u1.id
+		${ew.customSqlSegment}
+	</select>
+
+</mapper>

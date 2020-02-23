@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingle.oa.device.mapper.DevicescrapMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jingle.oa.device.entity.Devicescrap">
+        <id column="id" property="id"/>
+        <result column="crtm" property="crtm"/>
+        <result column="mdtm" property="mdtm"/>
+        <result column="did" property="did"/>
+        <result column="scraper" property="scraper"/>
+        <result column="scraperdate" property="scraperdate"/>
+        <result column="scrapremarks" property="scrapremarks"/>
+        <result column="status" property="status"/>
+        <result column="approver" property="approver"/>
+        <result column="approvalremarks" property="approvalremarks"/>
+        <result column="approvaldate" property="approvaldate"/>
+        <result column="crer" property="crer"/>
+        <result column="mder" property="mder"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        crtm,
+        mdtm,
+        id, did, scraper, scraperdate, scrapremarks, status, approver, approvalremarks, approvaldate, crer, mder
+    </sql>
+
+    <select id="selectVoById" resultType="com.jingle.oa.device.vo.DevicescrapVo">
+
+        SELECT
+        ds.*,
+        d.CODE dcode,
+        dt.NAME dtname,
+        dt.model dtmodel,
+        dt.brand dtbrand,
+        u.NAME uname
+        FROM
+        devicescrap ds
+        LEFT JOIN user u ON ds.scraper = u.id
+        LEFT JOIN device d ON ds.did = d.id
+        LEFT JOIN devicetype dt ON dt.id = d.dtid
+        where ds.id=#{id}
+    </select>
+
+    <select id="selectPageVo" resultType="com.jingle.oa.device.vo.DevicescrapVo">
+        SELECT
+        u.NAME uname,
+        dt.NAME dtname,
+        dt.brand dtbrand,
+        ds.*
+        FROM
+        devicescrap ds
+        LEFT JOIN user u ON ds.scraper = u.id
+        LEFT JOIN device d ON ds.did = d.id
+        LEFT JOIN devicetype dt ON d.dtid = dt.id
+    </select>
+</mapper>

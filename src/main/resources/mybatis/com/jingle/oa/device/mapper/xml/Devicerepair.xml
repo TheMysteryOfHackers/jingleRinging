@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingle.oa.device.mapper.DevicerepairMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jingle.oa.device.entity.Devicerepair">
+        <id column="id" property="id" />
+    <result column="crtm" property="crtm" />
+    <result column="mdtm" property="mdtm" />
+        <result column="did" property="did" />
+        <result column="damager" property="damager" />
+        <result column="damagedate" property="damagedate" />
+        <result column="damageremarks" property="damageremarks" />
+        <result column="repairdate" property="repairdate" />
+        <result column="repairer" property="repairer" />
+        <result column="repairremarks" property="repairremarks" />
+        <result column="status" property="status" />
+        <result column="crer" property="crer" />
+        <result column="mder" property="mder" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        crtm,
+        mdtm,
+        id, did, damager, damagedate, damageremarks, repairdate, repairer, repairremarks, status, crer, mder
+    </sql>
+
+    <select id="selectPageVo" resultType="com.jingle.oa.device.vo.DevicerepairVo">
+        SELECT
+        u.NAME udamager,
+        u2.NAME urepairer,
+        d.CODE,
+        drp.*
+        FROM
+        devicerepair drp
+        LEFT JOIN device d ON d.id = drp.did
+        LEFT JOIN user u ON u.id = drp.damager
+        LEFT JOIN user u2 ON u2.id = drp.repairer
+        ${ew.customSqlSegment}
+    </select>
+</mapper>
