@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="format-detection" content="telephone=no">
+		<meta http-equiv="Cache-Control" content="no-siteapp">
+		<link rel="stylesheet" href="../../../layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="../../../css/public.css" media="all" />
+	</head>
+
+	<body class="childrenBody">
+		<form class="layui-form" lay-filter="formTest" id="form" style="width: 80%;">
+			<div class="layui-form-item layui-row layui-col-xs12">
+				<label class="layui-form-label">设备类型</label>
+				<div class="layui-input-block">
+					<select id="dtid" name="dtid" lay-filter="dtid" lay-search>
+						<option value="">请选择</option>
+					</select>
+				</div>
+			</div>
+
+			<div class="layui-form-item layui-row layui-col-xs12">
+				<label class="layui-form-label">领用人</label>
+				<div class="layui-input-block">
+					<input type="text" class="layui-input" id="recipients" name="recipients" lay-verify="required|size" maxsize="100" placeholder="">
+				</div>
+			</div>
+			
+
+			<div class="layui-form-item layui-row layui-col-xs12">
+				<label class="layui-form-label">备注</label>
+				<div class="layui-input-block">
+					<textarea placeholder="" class="layui-textarea" name="receiveremarks"></textarea>
+				</div>
+			</div>
+
+			<div class="layui-form-item layui-row layui-col-xs12">
+				<div class="layui-input-block">
+					<button type="button" class="layui-btn layui-btn-sm" lay-submit="" lay-filter="submit">提交</button>
+					<button type="button" class="layui-btn layui-btn-sm layui-btn-primary close-btn">取消</button>
+				</div>
+			</div>
+		</form>
+		<script type="text/javascript" src="../../../js/jquery-2.1.1.min.js"></script>
+		<script type="text/javascript" src="../../../layui/layui.js"></script>
+		<script type="text/javascript" src="../../../custom/js/common.js"></script>
+		<!-- <script type="text/javascript" src="../../../js/index.js"></script> -->
+		<script type="text/javascript">
+			layui.use(['form', 'laydate', 'layer'], function() {
+				var form = layui.form;
+				var laydate = layui.laydate;
+				var layer = parent.layer === undefined ? layui.layer : top.layer,
+					$ = layui.jquery;
+				
+				var toInsertApi = constant.baseUrl + "/device/devicereceive/toInsert";
+				var insertApi = constant.baseUrl + "/device/devicereceive/insert";
+				var insertMethod = "post";
+				var url = insertApi;
+				var method = insertMethod;
+
+			
+				
+				
+					loadAjax(toInsertApi, "get", null, function(response) {
+						baseCallBack(response, function(response) {
+							//把响应的json填充到表单里面
+							if (response.data) {
+								var tmp = ""
+								for (data of response.data) {
+									tmp += '<option value="' + data.id + '">' + data.name + '</option>';
+									//devices[data.id] = data;
+								}
+								$("#dtid").append(tmp);
+							}
+							form.render('select'); //刷新select选择框渲染
+						});
+					});
+				
+				
+			
+			
+				form.on("submit(submit)", function(data) {
+					loadAjax(url, method, data.field, function(response) {
+						baseCallBack(response, parentReloadCallBack);
+						layer.msg("单据号:"+response.msg, {
+						    time: 20000, //20s后自动关闭
+						    btn: ['知道了']
+						  });
+						
+					});
+					return false;
+				})
+			})
+		</script>
+	</body>
+
+</html>

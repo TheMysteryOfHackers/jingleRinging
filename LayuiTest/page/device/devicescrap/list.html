@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="format-detection" content="telephone=no">
+		<meta http-equiv="Cache-Control" content="no-siteapp">
+		<link rel="stylesheet" href="../../../layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="../../../css/public.css" media="all" />
+	</head>
+
+	<body class="childrenBody">
+		<form class="layui-form">
+			<blockquote class="layui-elem-quote quoteBox">
+				<form class="layui-form">
+					
+					<div class="layui-inline">
+						<label class="layui-form-label">品牌</label>
+						<div class="layui-input-inline">
+							<input type="text" class="layui-input searchVal" id="brand" name="brand" placeholder="">
+						</div>
+					</div>
+					<div class="layui-inline">
+						<label class="layui-form-label">报废日期</label>
+						<div class="layui-input-inline">
+							<input type="text" class="layui-input searchVal" id="scraperdate" name="scraperdate" placeholder="">
+						</div>
+					</div>
+					<div class="layui-inline">
+						<label class="layui-form-label">状态</label>
+						<div class="layui-input-inline">
+							<input type="text" class="layui-input searchVal" id="status" name="status" placeholder="">
+						</div>
+					</div>
+				</form>
+				<div class="layui-inline">
+					<a class="layui-btn search-btn" data-type="reload">搜索</a>
+				</div>
+			</blockquote>
+			<blockquote class="layui-elem-quote quoteBox">
+				<div class="layui-inline">
+					<a class="layui-btn layui-btn-normal insert-btn" has-permission="000500100000">添加</a>
+					<a class="layui-btn layui-btn-danger layui-btn-normal delAl-btn" has-permission="000500100010">批量删除</a>
+				</div>
+			</blockquote>
+			<table id="list" lay-filter="list"></table>
+			<div class="list-page" id="page"></div>
+		</form>
+		<script type="text/javascript" src="../../../js/jquery-2.1.1.min.js"></script>
+		<script type="text/javascript" src="../../../layui/layui.js"></script>
+		<script type="text/javascript" src="../../../custom/js/common.js"></script>
+		<script type="text/javascript">
+			layui.use(['form', 'layer', 'table', 'laypage', 'laytpl','laydate'], function() {
+				var listApi = constant.baseUrl + '/device/devicescrap/list';
+				var toInsertHtml = 'insert.html';
+				var toApprovalHtml = 'approval.html';
+
+				var deleteApi = constant.baseUrl + '/device/devicescrap/delete';
+				var cols = [
+					[{
+						//type : "checkbox",
+						fixed: "left",
+						width: 50,
+						title: '<input type="checkbox" lay-skin="primary"  id="check-all" class="check-all" lay-filter="check-all">',
+						templet: function(d) {
+							var str = '';
+							str += '<input type="checkbox" lay-skin="primary" class="check-one"  value="' + d.id +
+								'" lay-filter="check-one">';
+							return str;
+						}
+					}, {
+						field: 'dtname',
+						title: '设备类型',
+						align: 'center'
+					}, {
+						field: 'dtbrand',
+						title: '品牌',
+						align: 'center'
+					},{
+						field: 'uname',
+						title: '报废人',
+						align: 'center',
+					}, {
+						field: 'scraperdate',
+						title: '报废日期',
+						align: 'center',
+					}, {
+						field: 'scrapremarks',
+						title: '报废备注',
+						align: 'center',
+					}, {
+						field: 'status',
+						title: '状态',
+						align: 'center',
+						templet: function(d) {
+							var str = '';
+							//1-申请、2-准许、3-拒绝
+							if (d.status == 1) {
+								str = '申请';
+							}
+							if (d.status == 2) {
+								str = '通过';
+							}
+							if (d.status == 3) {
+								str = '拒绝';
+							}
+							return str;
+						}
+					}, {
+						title: '操作',
+						fixed: "right",
+						align: "center",
+						width: 300,
+						templet: function(d) {
+							var str = '';
+							if (hasPermission('000500100005')) {
+							if (d.status == 1) {
+								str += '<a class="layui-btn layui-btn-xs" lay-event="toApproval">审批</a>';
+							}
+}
+if (hasPermission('000500100010')) {
+							str += '<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>';
+}
+							return str;
+						}
+					}]
+				];
+				var pram = merger(constant.page.toUri(), getsearchVal());
+				var laydate = layui.laydate;
+				var form = layui.form,
+					layer = parent.layer === undefined ? layui.layer : top.layer;
+				var $ = layui.jquery;
+				var laytpl = layui.laytpl;
+				var table = layui.table;
+				var laypage = layui.laypage;
+				tableIns = table.render({
+					elem: '#list',
+					cellMinWidth: constant.table.cellMinWidth,
+					page: false,
+					height: constant.table.height,
+					cols: cols,
+					done: function(res, page, count) {
+						checkAll(form);
+					}
+				});
+				//用户列表
+				listLoad(pram);
+
+				function listLoad(data) {
+					//loadAjax
+					//第一个参数url
+					//第二个参数 请求参数
+					//第三个参数 请求表单
+					//success回调
+					loadAjax(listApi, "get", data, function(response) {
+						//baseCallBack
+						//第一个参数response 
+						//第二个参数响应码为1000的时候回调函数
+						baseCallBack(response, function(response) {
+							table.reload("list", {
+								data: response.data.records,
+								limit: response.data.size
+							})
+							var page = laypage.render({
+								elem: 'page',
+								limits: constant.page.limits,
+								limit: response.data.size,
+								layout: constant.page.layout,
+								curr: response.data.current,
+								count: response.data.total,
+								jump: function(obj, first) {
+									if (!first) {
+										pram = merger(constant.page.toUri(obj), getsearchVal());
+										listLoad(pram);
+									}
+								}
+							});
+						});
+					});
+				}
+
+				//搜索【此功能需要后台配合，所以暂时没有动态效果演示】
+				$(".search-btn").click(function() {
+					pram = merger(pram, getsearchVal());
+					listLoad(pram);
+				});
+
+				//添加
+				$(".insert-btn").click(function() {
+					openFullLayer("添加", toInsertHtml);
+				});
+
+				//批量删除
+				$(".delAl-btn").click(function() {
+					var ids = getCheckedId();
+					if (ids && ids.length) {
+						confirmLayer('提示信息', '确定删除？', function(confirm, index) {
+							loadAjax(deleteApi + "/" + ids, "delete", null, function(response) {
+								baseCallBack(response, function(response) {
+									layer.msg(response.msg);
+									listLoad(pram);
+									confirm.close(index);
+								});
+							});
+						})
+					} else {
+						layer.msg("请选择需要删除的数据");
+					}
+				});
+
+				//列表操作
+				table.on('tool(list)', function(obj) {
+					var layEvent = obj.event;
+					var data = obj.data;
+					if (layEvent === 'toApproval') {
+							openAreaLayer("审批", toApprovalHtml+"?id=" + data.id, "400px", "500px", true);
+					}
+
+					if (layEvent === 'delete') {
+						//删除
+						confirmLayer('提示信息', '确定删除？', function(confirm, index) {
+							loadAjax(deleteApi + "/" + data.id, "delete", null, function(response) {
+								baseCallBack(response, function(response) {
+									layer.msg(response.msg);
+									listLoad(pram);
+									confirm.close(index);
+								});
+							});
+						})
+					}
+				});
+				//初始化日期
+				laydate.render({
+					elem: '#scraperdate'
+				});
+			})
+		</script>
+	</body>
+
+</html>

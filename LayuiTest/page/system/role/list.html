@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="format-detection" content="telephone=no">
+		<meta http-equiv="Cache-Control" content="no-siteapp">
+		<link rel="stylesheet" href="../../../layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="../../../css/public.css" media="all" />
+		<style type="text/css">
+			body {
+				padding: 10px 30px;
+			}
+			
+			.hide {
+				display: none
+			}
+		</style>
+	</head>
+
+	<body>
+		<form class="layui-form">
+			<blockquote class="layui-elem-quote quoteBox">
+				<div class="layui-inline">
+					<a class="layui-btn layui-btn-normal insert-btn" has-permission="000000100000">添加</a>
+				</div>
+			</blockquote>
+
+			<table class="layui-table layui-form" id="test-tree-table"></table>
+		</form>
+		<script type="text/javascript" src="../../../js/jquery-2.1.1.min.js"></script>
+		<script type="text/javascript" src="../../../layui/layui.js"></script>
+		<script type="text/javascript" src="../../../custom/js/common.js"></script>
+		<script type="text/javascript">
+			layui.config({
+				base: '../../../plugin/treetable/js/',
+			}).extend({
+				treetable: 'treetable'
+			}).use(['treetable', 'form', 'layer'], function() {
+				var layer = layui.layer;
+				var listApi = constant.baseUrl + '/system/role/list';
+				var toInsertHtml = 'insert.html';
+				var toUpdateHtml = 'insert.html';
+				var deleteApi = constant.baseUrl + '/system/role/delete';
+				var toUpdatePermissionHtml = 'updatePermission.html';
+				var cols = [{
+					field: 'name',
+					title: '岗位名称',
+					align: "center"
+				}, {
+					field: 'remarks',
+					title: '备注',
+					align: "center"
+				}, {
+					field: 'sort',
+					title: 'sort',
+					align: 'center'
+				}, {
+					title: '操作',
+					fixed: "right",
+					align: "center",
+					width: "20%",
+					template: function(d) {
+						var str = '';
+						if(hasPermission('000000100000')) {
+							str += '<a class="layui-btn layui-btn-xs layui-btn-normal" lay-filter="toInsert">添加</a>';
+						}
+						if(hasPermission('000000100005')) {
+							str += '<a class="layui-btn layui-btn-xs" lay-filter="toUpdate">编辑</a>';
+						}
+						if(hasPermission('000000100010')) {
+							str += '<a class="layui-btn layui-btn-xs" lay-filter="toUpdatePermission">授权</a>';
+						}
+						if(hasPermission('000000100015')) {
+							str += '<a class="layui-btn layui-btn-xs layui-btn-danger" lay-filter="delete">删除</a>';
+						}
+						return str;
+					}
+				}];
+				var o = layui.$,
+					treetable = layui.treetable;
+				var form = layui.form,
+					layer = layui.layer;
+				loadAjax(listApi, "get", null, function(response) {
+					baseCallBack(response, function(response) {
+						treetable.render({
+							elem: '#test-tree-table',
+							data: response.data,
+							field: 'name',
+							//is_checkbox : true,
+							//checked : [ 1, 2, 3, 4 ],
+							/*icon_val: {
+								open: "&#xe619;",
+								close: "&#xe61a;"
+							},
+							space: 4,*/
+							space: 3,
+							cols: cols
+						});
+						treetable.all('down');
+					});
+				});
+
+				//添加
+				$(".insert-btn").click(function() {
+					openFullLayer("添加", toInsertHtml);
+				});
+				treetable.on('treetable(toInsert)', function(data) {
+					//添加子节点
+					openFullLayer("添加", toInsertHtml + "?pid=" + data.item.id + "&level=" + data.item.level);
+				})
+				treetable.on('treetable(toUpdate)', function(data) {
+					//编辑
+					openFullLayer("编辑", toUpdateHtml + "?id=" + data.item.id);
+				})
+				treetable.on('treetable(toUpdatePermission)', function(data) {
+					//授权
+					openAreaLayer("授权", toUpdatePermissionHtml + "?id=" + data.item.id, "480px", "600px", true);
+
+				})
+				treetable.on('treetable(delete)', function(data) {
+					///删除
+					confirmLayer('提示信息', '确定删除？', function(confirm, index) {
+						loadAjax(deleteApi + "/" + data.item.id, "delete", null, function(response) {
+							baseCallBack(response, function(response) {
+								layer.msg(response.msg);
+								location.reload();
+								confirm.close(index);
+							});
+						});
+
+					})
+				})
+			})
+		</script>
+	</body>
+
+</html>
